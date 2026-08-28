@@ -103,6 +103,17 @@ function PreviewPage() {
     );
   }
 
+  // Verificação correta: se o documento está ativo mas o detail ainda não carregou
+  if (!detail) {
+    return (
+      <div className="glass-panel mx-auto max-w-xl p-10 text-center">
+        <p className="font-mono text-xs text-neon-amber animate-pulse-glow">
+          Carregando detalhes do documento...
+        </p>
+      </div>
+    );
+  }
+
   const sd = (detail?.document?.structured_data ?? {}) as StructuredData;
   const chunks = detail?.chunks ?? [];
   const filteredChunks =
@@ -110,7 +121,7 @@ function PreviewPage() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
-      <aside className="space-y-2">
+           <aside className="space-y-2">
         <h1 className="px-1 font-display text-sm font-bold uppercase tracking-[0.25em] text-foreground">
           Data Preview
         </h1>
@@ -147,7 +158,7 @@ function PreviewPage() {
                 Resumo
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-foreground">
-                {detail.document.summary ?? "Sem resumo disponível."}
+                {detail?.document?.summary ?? "Sem resumo disponível."}
               </p>
             </section>
 

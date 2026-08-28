@@ -1,8 +1,5 @@
 import { getGroqClient, GROQ_MODEL_NAME } from "./ai-gateway.server";
-import { createRequire } from "node:module";
-
-const require = createRequire(import.meta.url);
-const pdfParse = require("pdf-parse");
+import { PDFParse } from "pdf-parse";
 
 export function fileExtension(filename: string): string {
   if (!filename) return "";
@@ -10,19 +7,25 @@ export function fileExtension(filename: string): string {
   return parts.length > 1 ? parts.pop()?.toLowerCase() || "" : "";
 }
 
-export async function parseFile(file: File) {
-  const arrayBuffer = await file.arrayBuffer();
-  const uint8Array = new Uint8Array(arrayBuffer);
-  
+export async function parseFileServer(fileData: ArrayBuffer, fileName: string, fileType: string) {
+  const uint8Array = new Uint8Array(fileData);
   let extractedText = "";
-  
-  if (file.type === "application/pdf" || fileExtension(file.name) === "pdf") {
-    // Utiliza o require nativo para carregar o pdf-parse ignorando as travas de ESM do Vite
-    const parsedPdf = await pdfParse(uint8Array);
-    extractedText = parsedPdf.text;
+
+  if (fileType === "application/pdf" || fileExtension(fileName) === "pdf") {
+    try {
+      // Instancia a classe PDFParse conforme a API v2 da biblioteca
+      const parser = new PDFParse({ data: uint8Array });
+      const parsedPdf = await parser.getText();
+      await parser.destroy();
+      
+      extractedText = parsedPdf.text;
+    } catch (e: any) {
+      console.error("Erro no parser do PDF:", e);
+      throw new Error(`Falha ao processar o PDF no servidor: ${e.message}`);
+    }
   } else {
     const decoder = new TextDecoder("utf-8");
-    extractedText = decoder.decode(arrayBuffer);
+    extractedText = decoder.decode(fileData);
   }
 
   const safeText = String(extractedText || "")

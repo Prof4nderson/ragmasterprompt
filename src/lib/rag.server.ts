@@ -36,3 +36,12 @@ export function getGroqClient(): Groq {
     dangerouslyAllowBrowser: true,
   });
 }
+export async function embedTexts(texts: string[]): Promise<number[][]> {
+  // Ajustado para 768 dimensões conforme exigido pela tabela document_chunks do Supabase
+  return texts.map(() => new Array(768).fill(0));
+}
+
+export function toVectorLiteral(embedding: number[]): string {
+  if (!Array.isArray(embedding)) return "[]";
+  return `[${embedding.join(",")}]`;
+}

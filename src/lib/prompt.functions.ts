@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getGroqClient, GROQ_MODEL_NAME } from "./ai-gateway.server";
-import { listPrompts } from "./documents.server"; // Ou do seu arquivo de consulta do banco
+import { listPrompts } from "./documents.server";
 
 export const generatePromptFn = createServerFn({ method: "POST" })
   .validator((data: unknown) =>
@@ -31,23 +31,23 @@ export const generatePromptFn = createServerFn({ method: "POST" })
       temperature: 0.2,
     });
 
+    // Casting explícito com String()
     const rawContent = res?.choices?.[0]?.message?.content ?? "";
-const cleaned = String(rawContent)
-  .replace(/```json/gi, "")
-  .replace(/```/g, "")
-  .trim();
+    const cleaned = String(rawContent)
+      .replace(/```json/gi, "")
+      .replace(/```/g, "")
+      .trim();
 
     try {
       return JSON.parse(cleaned);
     } catch {
       return {
         title: "Prompt Gerado",
-        content: cleaned || "Não foi possível estruturar o prompt.",
+        content: cleaned || "Não foi possível estruturar o conteúdo do prompt.",
       };
     }
   });
 
-/** Adicione esta função para resolver a importação do queries.ts */
 export const listPromptsFn = createServerFn({ method: "GET" }).handler(async () => {
   return await listPrompts();
 });
